@@ -1,0 +1,222 @@
+# 🛳️ Geração de Superfície de Casco via Splines Cúbicas
+
+## 📌 Descrição do Projeto
+
+Este projeto tem como objetivo realizar a **representação geométrica de um casco naval** a partir de uma **tabela de offsets (offset table)**, utilizando **splines cúbicas naturais** implementadas manualmente em Python (sem uso de bibliotecas prontas como SciPy).
+
+A metodologia segue os fundamentos apresentados na disciplina de **Hidrostática e Estabilidade**, onde a geometria do casco é reconstruída a partir de dados discretos.
+
+---
+
+## 🎯 Objetivos
+
+* Converter uma tabela de offsets (Excel) para um formato estruturado (CSV)
+* Implementar **splines cúbicas naturais** do zero
+* Interpolar curvas:
+
+  * Em cada estação (z → y)
+  * Ao longo do comprimento (x → y)
+* Preparar os dados para geração de superfície do casco
+* Validar os resultados com testes
+
+---
+
+## 📂 Estrutura do Projeto
+
+```
+.
+├── Pre_Processamento/
+│   ├── offsettable.xlsx      # Tabela original de offsets
+│   ├── offsettable.csv       # Dados convertidos (x, z, y)
+│
+├── utils/
+│   ├── spline.py             # Implementação das splines cúbicas
+│   ├── preprocess.py         # Conversão Excel → CSV
+│
+├── tests/
+│   ├── test_spline.py        # Testes unitários das splines
+│
+├── main.py                   # Execução principal
+└── README.md
+```
+
+---
+
+## 📊 Formato dos Dados
+
+### 📥 Entrada (Excel)
+
+A planilha original segue o padrão de engenharia naval:
+
+* Linhas → estações (x)
+* Colunas → waterlines (z)
+* Valores → meia boca (y)
+
+---
+
+### 🔄 Saída (CSV)
+
+Após o pré-processamento, os dados são convertidos para:
+
+```
+x,z,y
+0,0,0
+0,1,1.2
+0,2,2.3
+5,0,0
+5,1,1.5
+```
+
+Onde:
+
+* `x` → posição longitudinal (estação)
+* `z` → altura (waterline)
+* `y` → meia boca
+
+---
+
+## ⚙️ Metodologia
+
+### 1. Pré-processamento
+
+Conversão da tabela Excel para formato estruturado:
+
+* Leitura com `pandas`
+* Transformação da matriz em lista de pontos
+* Exportação para CSV
+
+---
+
+### 2. Splines Cúbicas Naturais
+
+As splines são construídas conforme:
+
+* Continuidade de:
+
+  * função
+  * derivada primeira
+  * derivada segunda
+* Condições de contorno:
+
+[
+S''(x_0) = 0 \quad \text{e} \quad S''(x_n) = 0
+]
+
+---
+
+### 3. Sistema Linear
+
+Para determinar os coeficientes, resolve-se:
+
+* Sistema linear para ( g_k = S''(x_k) )
+* Utilizando:
+
+```python
+numpy.linalg.solve
+```
+
+---
+
+### 4. Construção das Curvas
+
+Para cada intervalo:
+
+[
+S_k(x) = a_k(x-x_k)^3 + b_k(x-x_k)^2 + c_k(x-x_k) + d_k
+]
+
+---
+
+### 5. Reconstrução do Casco
+
+O casco é obtido através de:
+
+1. Splines em cada estação → (z → y)
+2. Splines longitudinais → (x → y)
+3. Geração de malha (grid)
+
+---
+
+## 🧰 Tecnologias Utilizadas
+
+* Python 3.x
+* NumPy → operações matriciais
+* Pandas → manipulação de dados
+* Matplotlib → visualização
+* OpenPyXL → leitura de Excel
+
+---
+
+## ▶️ Como Executar
+
+### 1. Instalar dependências
+
+```bash
+pip install numpy pandas matplotlib openpyxl
+```
+
+---
+
+### 2. Executar pré-processamento
+
+```bash
+python utils/preprocess.py
+```
+
+---
+
+### 3. Rodar o programa principal
+
+```bash
+python main.py
+```
+
+---
+
+## 🧪 Testes
+
+Os testes garantem:
+
+* Continuidade da spline
+* Interpolação correta
+* Estabilidade numérica
+
+Executar:
+
+```bash
+pytest tests/
+```
+
+---
+
+## 📈 Possíveis Extensões
+
+* Geração de superfície 3D completa
+* Exportação para CAD (IGES/STEP)
+* Uso de NURBS
+* Interface gráfica
+* Integração com CFD
+
+---
+
+## ⚠️ Observações
+
+* O projeto **não utiliza SciPy**, visando entendimento completo do método numérico
+* A precisão depende da qualidade da tabela de offsets
+* Valores ausentes devem ser tratados no pré-processamento
+
+---
+
+## 📚 Referências
+
+* Notas de aula – Hidrostática e Estabilidade
+* Métodos Numéricos para Engenharia
+* Teoria de Splines
+
+---
+
+## 👨‍💻 Autor
+
+Projeto desenvolvido para fins acadêmicos em Engenharia.
+
+---
